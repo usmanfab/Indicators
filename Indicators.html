@@ -1,0 +1,591 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Metric Suggester Prototype</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 2rem auto;
+      line-height: 1.5;
+      color: #333;
+    }
+    h1 { text-align: center; }
+    .controls {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    label {
+      display: flex;
+      flex-direction: column;
+      font-weight: bold;
+      font-size: 0.9rem;
+    }
+    select {
+      padding: 0.4rem;
+      font-size: 1rem;
+    }
+    #results h2 {
+      margin-top: 1.5rem;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 0.2rem;
+    }
+    #results h3 {
+      margin: 1rem 0 0.3rem;
+      font-size: 1.1rem;
+    }
+    #results ul { margin: 0.2rem 0 0.8rem 1.2rem; }
+    #results li { margin-bottom: 0.3rem; }
+    .method-name { font-style: italic; }
+    .no-data {
+      margin-top: 2rem;
+      font-style: italic;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <h1>Product Metric Suggester</h1>
+
+  <div class="controls">
+    <label>
+      1) Choose your core user
+      <select id="coreUser">
+        <option value="" disabled selected>-- select --</option>
+        <option value="student">Student</option>
+        <option value="teacher">Teacher</option>
+      </select>
+    </label>
+
+    <label>
+      2) Choose an outcome
+      <select id="outcome" disabled>
+        <option value="" disabled selected>-- select --</option>
+      </select>
+    </label>
+  </div>
+
+  <div id="results"></div>
+
+  <script>
+    // =========================================
+    // === METRICS DATABASE (unchanged) ========
+    // =========================================
+    const metricsData = {
+      student: [
+        {
+          outcome: "Learning Gains",
+          dimensions: [
+            {
+              name: "Improved Academic Performance",
+              methods: [
+                {
+                  name: "Self-report survey",
+                  indicators: [
+                    "Percentage of students who self-assess having mastered the topic"
+                  ]
+                },
+                {
+                  name: "Third-party perception surveys",
+                  indicators: [
+                    "Percentage of teachers that declare that students have increased their learning gains"
+                  ]
+                },
+                {
+                  name: "Schools Records",
+                  indicators: [
+                    "Percentage increase in students’ GPA or subject-level grades"
+                  ]
+                },
+                {
+                  name: "Formative assessments (classroom or platform)",
+                  indicators: [
+                    "Percentage of correct answers (accuracy answer rate)",
+                    "Average score improvement in quizzes/formative assessments",
+                    "Percentage of students who eliminate a misconception in a given topic between baseline and follow-up"
+                  ]
+                },
+                {
+                  name: "Standardized Assessments",
+                  indicators: [
+                    "Percentage of students scoring above proficiency threshold on school exams (e.g., >80% correct)",
+                    "Percentage of students that increase in subject scores (e.g., math/science)",
+                    "Percentage of students below a certain proficiency level (pass exam rate)"
+                  ]
+                }
+              ]
+            },
+            {
+              name: "Learning Efficiency and Progress",
+              methods: [
+                {
+                  name: "Formative assessments (classroom or platform)",
+                  indicators: [
+                    "Average time spent per task/completion (time efficiency)",
+                    "Reduction in the number of attempts needed to answer correctly (attempt efficiency)",
+                    "Reduction in time to reach proficiency (time efficiency)"
+                  ]
+                },
+                {
+                  name: "Schools Records",
+                  indicators: [
+                    "Percentage reduction in remedial lesson enrollment (resource optimization)"
+                  ]
+                }
+              ]
+            },
+            {
+              name: "Conceptual Understanding and Transfer",
+              methods: [
+                {
+                  name: "Self-report survey",
+                  indicators: [
+                    "Percentage of students who report feeling able to explain what they’ve learned in their own words"
+                  ]
+                },
+                {
+                  name: "Constructed response rubric",
+                  indicators: [
+                    "Average score improvement in assignments (e.g., essays) using rubric-graded assignments"
+                  ]
+                },
+                {
+                  name: "Transfer task assessment",
+                  indicators: [
+                    "Percentage of students who successfully apply a learned concept to a new or unfamiliar context (e.g., PISA-style scenario-based transfer tasks)"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          outcome: "Cognitive Load & Engagement",
+          dimensions: [
+            {
+              name: "Cognitive Load Reduction",
+              methods: [
+                {
+                  name: "Self-report survey",
+                  indicators: [
+                    "Percentage of students who report ease of understanding when engaging with learning content",
+                    "Percentage of students who report reduced confusion or feelings of overload during learning tasks"
+                  ]
+                },
+                {
+                  name: "Third-party perception surveys",
+                  indicators: [
+                    "Percentage of teachers who observe fewer signs of confusion or cognitive overwhelm during lessons"
+                  ]
+                }
+              ]
+            },
+            {
+              name: "Behavioral Engagement",
+              methods: [
+                {
+                  name: "Self-report survey",
+                  indicators: [
+                    "Percentage of students who report improved ability to stay focused during independent or guided work",
+                    "Percentage of students who report consistent completion of assigned tasks or learning activities"
+                  ]
+                },
+                {
+                  name: "Third-party perception surveys",
+                  indicators: [
+                    "Percentage of teachers who report increased student focus or task completion during classroom activities",
+                    "Percentage of parents who report increased learning focus or persistence at home"
+                  ]
+                },
+                {
+                  name: "Platform data",
+                  indicators: [
+                    "Percentage of students who consistently complete assigned tasks across multiple settings",
+                    "Number of completed modules/tasks"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          outcome: "Motivation & Self-Efficacy",
+          dimensions: [
+            {
+              name: "Academic Self-Efficacy",
+              methods: [
+                {
+                  name: "Self-report survey",
+                  indicators: [
+                    "Percentage of students who report increased confidence in a specific subject area (e.g., math, writing)",
+                    "Percentage of students who report feeling more capable of succeeding in their schoolwork",
+                    "Average score on student self-efficacy scale regarding academic achievements (e.g., Bandura’s Self-Efficacy Scale or PISA 2018 Student Questionnaire)"
+                  ]
+                },
+                {
+                  name: "Third-party perception surveys",
+                  indicators: [
+                    "Percentage of teachers who report students show increased confidence in subject-specific classroom tasks"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          outcome: "Retention & Persistence",
+          dimensions: [
+            {
+              name: "School Attendance and Retention",
+              methods: [
+                {
+                  name: "Self-report survey",
+                  indicators: [
+                    "Percentage of students who report that they intend to complete the academic year or term",
+                    "Percentage of students who report rarely considering dropping out or skipping school",
+                    "Percentage of students who report feeling motivated to stay in school and continue learning"
+                  ]
+                },
+                {
+                  name: "Third-party perception surveys",
+                  indicators: [
+                    "Percentage of parents who report that their child regularly attends school",
+                    "Percentage of parents who believe their child is motivated to stay in school"
+                  ]
+                },
+                {
+                  name: "Schools Records",
+                  indicators: [
+                    "Percentage of students retained in school over the course of the academic year (enrolment vs dropout)",
+                    "Percentage of students meeting minimum school attendance requirements (e.g., 85%+)"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          outcome: "Self-regulated Learning",
+          dimensions: [
+            {
+              name: "Goal Setting and Planning",
+              methods: [
+                {
+                  name: "Self-report survey",
+                  indicators: [
+                    "Percentage of students who report setting learning goals before starting tasks",
+                    "Percentage of students who report making a plan or checklist before completing assignments",
+                    "Average score on a goal-setting and planning subscale (e.g., MSLQ or SRSI)"
+                  ]
+                },
+                {
+                  name: "Parent/teacher perception",
+                  indicators: [
+                    "Percentage of parents or teachers who report that the student works with clear goals or intentions"
+                  ]
+                }
+              ]
+            },
+            {
+              name: "Monitoring and Strategy Use",
+              methods: [
+                {
+                  name: "Self-report survey",
+                  indicators: [
+                    "Percentage of students who report checking their progress or understanding while learning",
+                    "Percentage of students who report using strategies (e.g., re-reading, highlighting, asking for help)",
+                    "Average score on a monitoring and strategy-use subscale (e.g., MSLQ or SRSI)"
+                  ]
+                },
+                {
+                  name: "Teacher perception survey",
+                  indicators: [
+                    "Percentage of teachers who report students using independent learning strategies more frequently"
+                  ]
+                },
+                {
+                  name: "Platform interaction data (optional)",
+                  indicators: [
+                    "Percentage of students who use embedded learning tools (e.g., hints, glossary, revision tools)"
+                  ]
+                }
+              ]
+            },
+            {
+              name: "Reflection and Adjustment",
+              methods: [
+                {
+                  name: "Self-report survey",
+                  indicators: [
+                    "Percentage of students who report revising their work based on feedback or personal review",
+                    "Percentage of students who report reflecting on what they could improve after a task",
+                    "Average score on a reflection and adjustment subscale (e.g., MSLQ Metacognitive Self-Regulation or SRSI Self-Reflection)"
+                  ]
+                },
+                {
+                  name: "Teacher perception survey",
+                  indicators: [
+                    "Percentage of teachers who report that students revise work or adjust strategies after feedback"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+
+      teacher: [
+        {
+          outcome: "Teacher Practice",
+          dimensions: [
+            {
+              name: "Lesson Planning and Preparation",
+              methods: [
+                {
+                  name: "Self-report survey",
+                  indicators: [
+                    "Percentage of lessons taught by the teacher in the past week that were prepared using a lesson plan"
+                  ]
+                },
+                {
+                  name: "Classroom observation",
+                  indicators: [
+                    "Percentage of observed lessons where instruction closely follows the submitted lesson plan (e.g. TEAM General Educator Rubric)",
+                    "Percentage of observed lessons where the teacher effectively adapts the lesson plan in response to student understanding and engagement (e.g. Danielson Framework for Teaching)"
+                  ]
+                },
+                {
+                  name: "Records",
+                  indicators: [
+                    "Percentage of submitted lesson plans that include clear learning objectives, aligned instructional activities, and assessment methods (e.g., Danielson Framework)",
+                    "Percentage of lesson plans demonstrating differentiation strategies to accommodate varied learning styles and abilities (e.g., UNK, UVU, WPU Rubrics)"
+                  ]
+                }
+              ]
+            },
+            {
+              name: "Use of pedagogical strategies that support student-centred and deep learning approaches",
+              methods: [
+                {
+                  name: "Self-report survey",
+                  indicators: [
+                    "Percentage of teachers who report frequent use of student-centred strategies"
+                  ]
+                },
+                {
+                  name: "Third-party perception",
+                  indicators: [
+                    "Percentage of head teachers who report increased use of student-centred practices in classrooms"
+                  ]
+                },
+                {
+                  name: "Classroom observation",
+                  indicators: [
+                    "Percentage of observed lessons in which students actively participate in learning activities",
+                    "Percentage of lessons featuring opportunities for analysis, application, or critical thinking",
+                    "Composite score of teacher’s cognitive engagement, dialogic instruction, and active learning strategies, based on structured rubric (e.g. TEACH tool)"
+                  ]
+                }
+              ]
+            },
+            {
+              name: "Equity and inclusion practices",
+              methods: [
+                {
+                  name: "Self-report survey",
+                  indicators: [
+                    "Percentage of teachers who report actively promoting gender equity and inclusion in lessons",
+                    "Percentage of teachers who report adapting instruction for diverse learning needs"
+                  ]
+                },
+                {
+                  name: "Third-party perception",
+                  indicators: [
+                    "Percentage of girls who feel encouraged to speak or participate in class",
+                    "Percentage of students who report being treated respectfully regardless of gender or background"
+                  ]
+                },
+                {
+                  name: "Classroom observation",
+                  indicators: [
+                    "Percentage of lessons in which teachers ensure balanced participation by gender",
+                    "Average score in classroom observation for inclusion, based on rubric (e.g. TEACH 1.4a/1.4b or GEC inclusion scoring tools)"
+                  ]
+                }
+              ]
+            },
+            {
+              name: "Use of instructional techniques (formative assessment, scaffolding & modelling)",
+              methods: [
+                {
+                  name: "Self-report survey",
+                  indicators: [
+                    "Number of distinct lessons in the past week in which the teacher reports using formative assessment techniques"
+                  ]
+                },
+                {
+                  name: "Third-party perception surveys",
+                  indicators: [
+                    "Percentage of teachers who report using scaffolding and modelling to support struggling learners",
+                    "Percentage of students who report receiving helpful feedback from the teacher (GEC rubric)",
+                    "Percentage of students who report that the teacher checks whether they understand during lessons (PISA item)",
+                    "Percentage of students who report learning through step-by-step examples or guided practice"
+                  ]
+                },
+                {
+                  name: "Classroom observation",
+                  indicators: [
+                    "Percentage of teachers observed using scaffolding techniques (e.g., step-by-step examples, guided practice)",
+                    "Percentage of observed lessons where the teacher models skills, strategies, or problem-solving processes",
+                    "Percentage of observed lessons where the teacher uses formative assessment (e.g., checks for understanding, quizzes, learning games)",
+                    "Average observation score for use of instructional techniques (formative assessment, scaffolding, modelling), based on structured rubric (e.g., TEACH, GEC)"
+                  ]
+                },
+                {
+                  name: "Records",
+                  indicators: [
+                    "Percentage of teachers who submit examples of evidence of formative assessment as quizzes used in the last week"
+                  ]
+                }
+              ]
+            },
+            {
+              name: "Classroom management and organisation",
+              methods: [
+                {
+                  name: "Self-report survey",
+                  indicators: [
+                    "Percentage of teachers who report using consistent routines and transitions in their lessons",
+                    "Percentage of teachers who report confidence in managing time, materials, and student behaviour"
+                  ]
+                },
+                {
+                  name: "Third-party perception surveys",
+                  indicators: [
+                    "Percentage of head teachers who report that teachers maintain well-managed, structured classrooms",
+                    "Score based on student survey regarding classroom routines and management (Tripod 7Cs Framework)",
+                    "Percentage of students who report that their teacher effectively manages classroom activities and maintains a focused learning environment (e.g., Block survey)"
+                  ]
+                },
+                {
+                  name: "Classroom observation",
+                  indicators: [
+                    "Percentage of observed lessons where teachers effectively implement established routines and transitions (e.g., Productivity dimension in CLASS)",
+                    "Percentage of observed lessons where teachers manage time and materials efficiently (e.g., Instructional Learning Formats dimension in CLASS or Use of Instructional Materials category in the Stallings System)",
+                    "Average observation score for classroom management, based on structured rubric (e.g., TEACH 1.1, 1.2, 1.3 or GEC)"
+                  ]
+                }
+              ]
+            },
+            {
+              name: "Use of instructional assessment techniques",
+              methods: [
+                {
+                  name: "Self-report survey",
+                  indicators: [
+                    "Number of distinct lessons in the past week in which the teacher reports using formative assessment techniques"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        // You can add the remaining teacher outcomes here …
+      ]
+    };
+
+    // =========================================
+    // === UI / RENDERING LOGIC ================
+    // =========================================
+    const coreUserEl = document.getElementById('coreUser');
+    const outcomeEl  = document.getElementById('outcome');
+    const resultsEl  = document.getElementById('results');
+
+    // ----- core user selection -----
+    coreUserEl.addEventListener('change', () => {
+      const user = coreUserEl.value;
+      populateOutcomes(user);      // now also renders results
+    });
+
+    // ----- outcome selection -----
+    outcomeEl.addEventListener('change', () => {
+      renderResults(coreUserEl.value, outcomeEl.value);
+    });
+
+    // Build outcome list, pre-select “all”, immediately show results
+    function populateOutcomes(user) {
+      outcomeEl.innerHTML = '';
+
+      if (!user || !metricsData[user] || metricsData[user].length === 0) {
+        outcomeEl.disabled = true;
+        outcomeEl.innerHTML =
+          '<option value="" disabled selected>No outcomes</option>';
+        resultsEl.innerHTML = '';
+        return;
+      }
+
+      outcomeEl.disabled = false;
+
+      // collect unique outcomes
+      const recs   = metricsData[user];
+      const unique = [...new Set(recs.map(r => r.outcome))];
+
+      // 1) add the “all” option
+      outcomeEl.appendChild(new Option('All outcomes', 'all'));
+
+      // 2) add each individual outcome
+      unique.forEach(o => outcomeEl.appendChild(new Option(o, o)));
+
+      // 3) select first entry (“all”) programmatically
+      outcomeEl.selectedIndex = 0;
+
+      // 4) render right away (no need to wait for a change event)
+      renderResults(user, 'all');
+    }
+
+    // Render outcomes/dimensions/methods/indicators to #results
+    function renderResults(user, outcome) {
+      resultsEl.innerHTML = '';
+
+      if (!user || !metricsData[user]) { return; }
+
+      const recs = metricsData[user]
+                   .filter(r => outcome === 'all' || r.outcome === outcome);
+
+      if (recs.length === 0) {
+        resultsEl.innerHTML = '<div class="no-data">No metrics found.</div>';
+        return;
+      }
+
+      recs.forEach(r => {
+        const h2 = document.createElement('h2');
+        h2.textContent = r.outcome;
+        resultsEl.appendChild(h2);
+
+        r.dimensions.forEach(dim => {
+          const h3 = document.createElement('h3');
+          h3.textContent = dim.name;
+          resultsEl.appendChild(h3);
+
+          dim.methods.forEach(m => {
+            const p = document.createElement('p');
+            p.innerHTML = `<span class="method-name">${m.name}:</span>`;
+            resultsEl.appendChild(p);
+
+            const ul = document.createElement('ul');
+            m.indicators.forEach(ind => {
+              const li = document.createElement('li');
+              li.textContent = ind;
+              ul.appendChild(li);
+            });
+            resultsEl.appendChild(ul);
+          });
+        });
+      });
+    }
+  </script>
+</body>
+</html>
