@@ -1,3 +1,4 @@
+```html
 <!doctype html>
 <html lang="en">
 <head>
@@ -72,10 +73,11 @@
 
   <script>
     // =========================================
-    // === METRICS DATABASE (unchanged) ========
+    // === METRICS DATABASE ====================
     // =========================================
     const metricsData = {
       student: [
+        /* ---------  student outcomes unchanged  --------- */
         {
           outcome: "Learning Gains",
           dimensions: [
@@ -338,6 +340,9 @@
       ],
 
       teacher: [
+        /* --------------------------------------------------------------------
+         * 0) Existing outcome: Teacher Practice
+         * ------------------------------------------------------------------ */
         {
           outcome: "Teacher Practice",
           dimensions: [
@@ -492,8 +497,226 @@
               ]
             }
           ]
+        },
+
+        /* --------------------------------------------------------------------
+         * 1) Teacher Commitment and Instructional Effort
+         * ------------------------------------------------------------------ */
+        {
+          outcome: "Teacher Commitment and Instructional Effort",
+          dimensions: [
+            {
+              name: "Efficiency in lesson preparation",
+              methods: [
+                {
+                  name: "Self-report survey",
+                  indicators: [
+                    "Average number of hours per week teachers report spending on lesson preparation",
+                    "Percentage of teachers that saved time spent on tailoring their teaching adaptively to students' learning levels",
+                    "Percentage of teachers who report preparing their lessons more efficiently"
+                  ]
+                },
+                {
+                  name: "Third-party perception surveys",
+                  indicators: [
+                    "Percentage of head teachers who report that teachers prepare lessons more efficiently",
+                    "Percentage of head teachers who report increased lesson planning since tool introduction",
+                    "Percentage of parents who perceive improvements in teachers’ class preparation"
+                  ]
+                },
+                {
+                  name: "Observation-based evidence",
+                  indicators: [
+                    "Percentage of observed teachers who had a visible lesson plan during class"
+                  ]
+                },
+                {
+                  name: "Document review / records",
+                  indicators: [
+                    "Percentage of teachers who submitted lesson plans or preparation evidence in the last month"
+                  ]
+                }
+              ]
+            },
+            {
+              name: "Engagement in professional development",
+              methods: [
+                {
+                  name: "Self-report survey",
+                  indicators: [
+                    "Percentage of teachers who report participating in professional development or training in the past month",
+                    "Percentage of teachers who report proactively seeking out teaching resources or learning opportunities",
+                    "Number of training sessions the teacher has attended in the last month"
+                  ]
+                },
+                {
+                  name: "Third-party perception surveys",
+                  indicators: [
+                    "Percentage of head teachers who report increased teacher participation in professional development activities"
+                  ]
+                },
+                {
+                  name: "Administrative records",
+                  indicators: [
+                    "Number of training sessions attended by each teacher in the past academic term",
+                    "Number of certifications or badges obtained by teachers through structured professional development"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+
+        /* --------------------------------------------------------------------
+         * 2) Teacher Knowledge
+         * ------------------------------------------------------------------ */
+        {
+          outcome: "Teacher Knowledge",
+          dimensions: [
+            {
+              name: "Improvement in pedagogical and instructional methods knowledge",
+              methods: [
+                {
+                  name: "Self-report survey",
+                  indicators: [
+                    "Percentage of teachers who report improved understanding of instructional strategies"
+                  ]
+                },
+                {
+                  name: "Teacher planning reflections (Portfolio)",
+                  indicators: [
+                    "Percentage of teachers who can articulate why they selected a specific teaching strategy for a lesson (coded as correct or partially correct)"
+                  ]
+                },
+                {
+                  name: "Scenario-based assessment",
+                  indicators: [
+                    "Average score on a scenario-based pedagogical judgment test (e.g. Learning Sciences Assessment (LSA))"
+                  ]
+                },
+                {
+                  name: "Test assessments",
+                  indicators: [
+                    "Percentage of teachers who correctly answer pedagogical questions (e.g. Teacher Knowledge Survey from TALIS)"
+                  ]
+                }
+              ]
+            },
+            {
+              name: "Improved understanding and use of national curriculum",
+              methods: [
+                {
+                  name: "Self-report survey",
+                  indicators: [
+                    "Percentage of teachers who report improved understanding of curriculum topics after using the tool",
+                    "Percentage of teachers who report aligning their lesson planning more closely with the national curriculum"
+                  ]
+                },
+                {
+                  name: "Third-party perception surveys",
+                  indicators: [
+                    "Percentage of head teachers who report that teachers follow the curriculum more systematically",
+                    "Percentage of head teachers who report improved teacher confidence in curriculum interpretation"
+                  ]
+                },
+                {
+                  name: "Observation-based evidence",
+                  indicators: [
+                    "Percentage of observed lessons judged to be aligned with curriculum goals (based on a structured rubric)"
+                  ]
+                },
+                {
+                  name: "Document review / records",
+                  indicators: [
+                    "Percentage of lesson plans that show alignment with curriculum content and progression"
+                  ]
+                }
+              ]
+            },
+            {
+              name: "Improvement in teacher subject-matter knowledge",
+              methods: [
+                {
+                  name: "Self-report survey",
+                  indicators: [
+                    "Percentage of teachers who report improved understanding of subject content since using the tool"
+                  ]
+                },
+                {
+                  name: "Survey to other people",
+                  indicators: [
+                    "Percentage of head teachers who report improved subject-matter command among teachers"
+                  ]
+                },
+                {
+                  name: "Records",
+                  indicators: [
+                    "Number of teachers who obtained a recognised qualification or accreditation in their teaching subject"
+                  ]
+                },
+                {
+                  name: "Test assessments (6–12 months)",
+                  indicators: [
+                    "Percentage of teachers who score above a curriculum mastery threshold (e.g., 80%) on a subject knowledge test (e.g., World Bank Minimum Knowledge Indicator, Education SDI survey instruments)",
+                    "Percentage of teachers whose subject test scores improve between baseline and follow-up (e.g., time-sensitive assessments used in professional development studies; Yoon et al., 2007)",
+                    "Percentage of teachers who select incorrect answers on test items that reflect common misconceptions in a given subject (e.g., misconception-aware items; Ball, Thames & Phelps 2008; Chen et al. 2020 LifeSciEd)"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+
+        /* --------------------------------------------------------------------
+         * 3) Teacher Self-Efficacy
+         * ------------------------------------------------------------------ */
+        {
+          outcome: "Teacher Self-Efficacy",
+          dimensions: [
+            {
+              name: "Confidence in lesson planning",
+              methods: [
+                {
+                  name: "Self-report survey",
+                  indicators: [
+                    "Percentage of teachers who report confidence in designing and implementing lesson plans aligned with learning objectives",
+                    "Percentage of teachers who feel prepared to adapt lesson plans based on student needs and feedback"
+                  ]
+                },
+                {
+                  name: "Third-party perception surveys",
+                  indicators: [
+                    "Percentage of instructional coaches or mentors who observe and report that teachers demonstrate confidence during lesson planning sessions"
+                  ]
+                },
+                {
+                  name: "Classroom observation",
+                  indicators: [
+                    "Percentage of observed lessons rated as showing evidence of teacher confidence and thorough preparation"
+                  ]
+                }
+              ]
+            },
+            {
+              name: "Confidence in using effective teaching strategies",
+              methods: [
+                {
+                  name: "Self-report survey",
+                  indicators: [
+                    "Percentage of teachers who report confidence in employing a variety of instructional strategies to meet diverse student needs",
+                    "Average score on a teaching confidence scale for planning lessons (e.g. Teachers’ Sense of Efficacy Scale or Standards Self-Efficacy Scale)"
+                  ]
+                },
+                {
+                  name: "Third-party perception surveys",
+                  indicators: [
+                    "Percentage of instructional coaches or mentors who observe and report that teachers demonstrate confidence in implementing effective teaching strategies"
+                  ]
+                }
+              ]
+            }
+          ]
         }
-        // You can add the remaining teacher outcomes here …
       ]
     };
 
