@@ -2,82 +2,198 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Metric Suggester Prototype</title>
+  <title>Indicators for AI-EdTech Products</title>
 
   <style>
     body {
       font-family: Arial, sans-serif;
-      max-width: 800px;
+      max-width: 1200px;
       margin: 2rem auto;
       line-height: 1.5;
       color: #333;
+      background: #f5f5f5;
     }
-    h1 { text-align: center; }
-    .controls {
+
+    h1 {
+      text-align: center;
+      font-size: 2.5rem;
+      margin-bottom: 3rem;
+      color: #2c3e50;
+    }
+
+    .user-choice {
       display: flex;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
+      justify-content: center;
+      gap: 2rem;
+      margin-bottom: 3rem;
     }
-    label {
-      display: flex;
-      flex-direction: column;
-      font-weight: bold;
-      font-size: 0.9rem;
+
+    .user-block {
+      padding: 2rem 4rem;
+      border-radius: 10px;
+      background: white;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
     }
-    select {
-      padding: 0.4rem;
-      font-size: 1rem;
+
+    .user-block:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
     }
-    #results h2 {
-      margin-top: 1.5rem;
-      border-bottom: 1px solid #ccc;
-      padding-bottom: 0.2rem;
+
+    .user-block.active {
+      background: #3498db;
+      color: white;
     }
-    #results h3 {
-      margin: 1rem 0 0.3rem;
-      font-size: 1.1rem;
-    }
-    #results ul { margin: 0.2rem 0 0.8rem 1.2rem; }
-    #results li { margin-bottom: 0.3rem; }
-    .method-name { font-style: italic; }
-    .no-data {
+
+    .outcomes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
       margin-top: 2rem;
-      font-style: italic;
-      color: #666;
+    }
+
+    .outcome-block {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .outcome-block:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    .outcome-block.active {
+      background: #3498db;
+      color: white;
+    }
+
+    .outcome-content {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.9);
+      z-index: 1000;
+      overflow-y: auto;
+      padding: 2rem;
+    }
+
+    .outcome-content.visible {
+      display: block;
+    }
+
+    .outcome-content-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: #f5f5f5;
+      padding: 2rem;
+      border-radius: 10px;
+      position: relative;
+    }
+
+    .close-button {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      font-size: 1.5rem;
+      background: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .dimensions-list {
+      margin-top: 2rem;
+    }
+
+    .dimension-item {
+      background: #fff;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .dimension-title {
+      color: #2c3e50;
+      margin-top: 0;
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+    }
+
+    .methods-group {
+      margin-top: 1rem;
+    }
+
+    .method-item {
+      background: #e9f7fe;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 6px;
+    }
+
+    .method-name {
+      font-weight: bold;
+      color: #2c3e50;
+      margin-bottom: 0.5rem;
+    }
+
+    .indicators-list {
+      margin: 0.5rem 0 0 1.2rem;
+    }
+
+    .indicators-list li {
+      margin-bottom: 0.3rem;
+    }
+
+    .outcome-description {
+      background: #e9f7fe;
+      padding: 1rem;
+      border-radius: 6px;
+      margin-bottom: 1.5rem;
+      font-style: normal;
+      color: #2c3e50;
+    }
+
+    /* Hide all content initially */
+    #results {
+      display: none;
+    }
+
+    #results.visible {
+      display: block;
     }
   </style>
 </head>
 <body>
   <h1>Indicators for AI-EdTech Products</h1>
 
-  <div class="controls">
-    <label>
-      1) Choose your core user
-      <select id="coreUser">
-        <option value="" disabled selected>-- select --</option>
-        <option value="student">Student</option>
-        <option value="teacher">Teacher</option>
-      </select>
-    </label>
-
-    <label>
-      2) Choose an outcome
-      <select id="outcome" disabled>
-        <option value="" disabled selected>-- select --</option>
-      </select>
-    </label>
+  <div class="user-choice">
+    <div class="user-block" data-user="student">Student</div>
+    <div class="user-block" data-user="teacher">Teacher</div>
   </div>
 
   <div id="results"></div>
 
   <script>
-    // =========================================
-    // === METRICS DATABASE ====================
-    // =========================================
+    // Keep existing metricsData object unchanged
     const metricsData = {
       student: [
-        /* ---------  student outcomes unchanged  --------- */
-        {
+      {
           outcome: "Learning Gains",
           dimensions: [
             {
@@ -98,7 +214,7 @@
                 {
                   name: "Schools Records",
                   indicators: [
-                    "Percentage increase in students’ GPA or subject-level grades"
+                    "Percentage increase in students' GPA or subject-level grades"
                   ]
                 },
                 {
@@ -144,7 +260,7 @@
                 {
                   name: "Self-report survey",
                   indicators: [
-                    "Percentage of students who report feeling able to explain what they’ve learned in their own words"
+                    "Percentage of students who report feeling able to explain what they've learned in their own words"
                   ]
                 },
                 {
@@ -161,7 +277,8 @@
                 }
               ]
             }
-          ]
+          ],
+          description: "Improvements in academic performance and content mastery"
         },
         {
           outcome: "Cognitive Load & Engagement",
@@ -210,7 +327,8 @@
                 }
               ]
             }
-          ]
+          ],
+          description: "Reduction in mental effort and increase in active participation in learning"
         },
         {
           outcome: "Motivation & Self-Efficacy",
@@ -223,7 +341,7 @@
                   indicators: [
                     "Percentage of students who report increased confidence in a specific subject area (e.g., math, writing)",
                     "Percentage of students who report feeling more capable of succeeding in their schoolwork",
-                    "Average score on student self-efficacy scale regarding academic achievements (e.g., Bandura’s Self-Efficacy Scale or PISA 2018 Student Questionnaire)"
+                    "Average score on student self-efficacy scale regarding academic achievements (e.g., Bandura's Self-Efficacy Scale or PISA 2018 Student Questionnaire)"
                   ]
                 },
                 {
@@ -234,7 +352,8 @@
                 }
               ]
             }
-          ]
+          ],
+          description: "Increases in students' confidence, persistence, and willingness to tackle challenges"
         },
         {
           outcome: "Retention & Persistence",
@@ -260,13 +379,14 @@
                 {
                   name: "Schools Records",
                   indicators: [
-                    "Percentage of students retained in school over the course of the academic year (enrolment vs dropout)",
+                    "Percentage of students retained in school over the course of the academic year (enrollment vs dropout)",
                     "Percentage of students meeting minimum school attendance requirements (e.g., 85%+)"
                   ]
                 }
               ]
             }
-          ]
+          ],
+          description: "Students' continuation in learning activities or full completion of a course/module"
         },
         {
           outcome: "Self-regulated Learning",
@@ -334,15 +454,12 @@
                 }
               ]
             }
-          ]
+          ],
+          description: "Improvements in students' ability to plan, monitor, and reflect on their own learning"
         }
       ],
-
       teacher: [
-        /* --------------------------------------------------------------------
-         * 0) Existing outcome: Teacher Practice
-         * ------------------------------------------------------------------ */
-        {
+      {
           outcome: "Teacher Practice",
           dimensions: [
             {
@@ -390,7 +507,7 @@
                   indicators: [
                     "Percentage of observed lessons in which students actively participate in learning activities",
                     "Percentage of lessons featuring opportunities for analysis, application, or critical thinking",
-                    "Composite score of teacher’s cognitive engagement, dialogic instruction, and active learning strategies, based on structured rubric (e.g. TEACH tool)"
+                    "Composite score of teacher's cognitive engagement, dialogic instruction, and active learning strategies, based on structured rubric (e.g. TEACH tool)"
                   ]
                 }
               ]
@@ -495,7 +612,8 @@
                 }
               ]
             }
-          ]
+          ],
+          description: "Encompasses the instructional methods and classroom strategies teachers use to facilitate learning, manage the classroom, and support diverse student needs"
         },
 
         /* --------------------------------------------------------------------
@@ -520,7 +638,7 @@
                   indicators: [
                     "Percentage of head teachers who report that teachers prepare lessons more efficiently",
                     "Percentage of head teachers who report increased lesson planning since tool introduction",
-                    "Percentage of parents who perceive improvements in teachers’ class preparation"
+                    "Percentage of parents who perceive improvements in teachers' class preparation"
                   ]
                 },
                 {
@@ -563,7 +681,8 @@
                 }
               ]
             }
-          ]
+          ],
+          description: "Reflects the time, energy, and dedication teachers invest in improving their competencies and enhancing instructional effectiveness"
         },
 
         /* --------------------------------------------------------------------
@@ -663,7 +782,8 @@
                 }
               ]
             }
-          ]
+          ],
+          description: "Encompasses teachers' understanding of subject matter, pedagogical principles, and curricular content"
         },
 
         /* --------------------------------------------------------------------
@@ -703,7 +823,7 @@
                   name: "Self-report survey",
                   indicators: [
                     "Percentage of teachers who report confidence in employing a variety of instructional strategies to meet diverse student needs",
-                    "Average score on a teaching confidence scale for planning lessons (e.g. Teachers’ Sense of Efficacy Scale or Standards Self-Efficacy Scale)"
+                    "Average score on a teaching confidence scale for planning lessons (e.g. Teachers' Sense of Efficacy Scale or Standards Self-Efficacy Scale)"
                   ]
                 },
                 {
@@ -714,99 +834,125 @@
                 }
               ]
             }
-          ]
+          ],
+          description: "Reflects teachers' beliefs in their ability to effectively engage students, implement instructional strategies, and manage classroom challenges to promote learning"
         }
       ]
     };
 
-    // =========================================
-    // === UI / RENDERING LOGIC ================
-    // =========================================
-    const coreUserEl = document.getElementById('coreUser');
-    const outcomeEl  = document.getElementById('outcome');
-    const resultsEl  = document.getElementById('results');
+    const userBlocks = document.querySelectorAll('.user-block');
+    const resultsEl = document.getElementById('results');
 
-    // ----- core user selection -----
-    coreUserEl.addEventListener('change', () => {
-      const user = coreUserEl.value;
-      populateOutcomes(user);      // now also renders results
-    });
-
-    // ----- outcome selection -----
-    outcomeEl.addEventListener('change', () => {
-      renderResults(coreUserEl.value, outcomeEl.value);
-    });
-
-    // Build outcome list, pre-select “all”, immediately show results
-    function populateOutcomes(user) {
-      outcomeEl.innerHTML = '';
-
-      if (!user || !metricsData[user] || metricsData[user].length === 0) {
-        outcomeEl.disabled = true;
-        outcomeEl.innerHTML =
-          '<option value="" disabled selected>No outcomes</option>';
-        resultsEl.innerHTML = '';
-        return;
-      }
-
-      outcomeEl.disabled = false;
-
-      // collect unique outcomes
-      const recs   = metricsData[user];
-      const unique = [...new Set(recs.map(r => r.outcome))];
-
-      // 1) add the “all” option
-      outcomeEl.appendChild(new Option('All outcomes', 'all'));
-
-      // 2) add each individual outcome
-      unique.forEach(o => outcomeEl.appendChild(new Option(o, o)));
-
-      // 3) select first entry (“all”) programmatically
-      outcomeEl.selectedIndex = 0;
-
-      // 4) render right away (no need to wait for a change event)
-      renderResults(user, 'all');
-    }
-
-    // Render outcomes/dimensions/methods/indicators to #results
-    function renderResults(user, outcome) {
-      resultsEl.innerHTML = '';
-
-      if (!user || !metricsData[user]) { return; }
-
-      const recs = metricsData[user]
-                   .filter(r => outcome === 'all' || r.outcome === outcome);
-
-      if (recs.length === 0) {
-        resultsEl.innerHTML = '<div class="no-data">No metrics found.</div>';
-        return;
-      }
-
-      recs.forEach(r => {
-        const h2 = document.createElement('h2');
-        h2.textContent = r.outcome;
-        resultsEl.appendChild(h2);
-
-        r.dimensions.forEach(dim => {
-          const h3 = document.createElement('h3');
-          h3.textContent = dim.name;
-          resultsEl.appendChild(h3);
-
-          dim.methods.forEach(m => {
-            const p = document.createElement('p');
-            p.innerHTML = `<span class="method-name">${m.name}:</span>`;
-            resultsEl.appendChild(p);
-
-            const ul = document.createElement('ul');
-            m.indicators.forEach(ind => {
-              const li = document.createElement('li');
-              li.textContent = ind;
-              ul.appendChild(li);
-            });
-            resultsEl.appendChild(ul);
-          });
-        });
+    // Handle user selection
+    userBlocks.forEach(block => {
+      block.addEventListener('click', () => {
+        // Remove active class from all blocks
+        userBlocks.forEach(b => b.classList.remove('active'));
+        // Add active class to clicked block
+        block.classList.add('active');
+        
+        const user = block.dataset.user;
+        renderOutcomes(user);
       });
+    });
+
+    function renderOutcomes(user) {
+      const outcomes = metricsData[user];
+      
+      resultsEl.innerHTML = '';
+      resultsEl.classList.add('visible');
+
+      const outcomesGrid = document.createElement('div');
+      outcomesGrid.className = 'outcomes-grid';
+
+      outcomes.forEach(outcome => {
+        const outcomeBlock = document.createElement('div');
+        outcomeBlock.className = 'outcome-block';
+        outcomeBlock.innerHTML = `<h2>${outcome.outcome}</h2>`;
+        
+        // Create the full-screen content container for this outcome
+        const outcomeContent = document.createElement('div');
+        outcomeContent.className = 'outcome-content';
+        
+        const outcomeContentInner = document.createElement('div');
+        outcomeContentInner.className = 'outcome-content-inner';
+        
+        // Add close button
+        const closeButton = document.createElement('button');
+        closeButton.className = 'close-button';
+        closeButton.innerHTML = '×';
+        closeButton.addEventListener('click', (e) => {
+          e.stopPropagation();
+          outcomeContent.classList.remove('visible');
+        });
+        
+        outcomeContentInner.appendChild(closeButton);
+        
+        // Add outcome title
+        const outcomeTitle = document.createElement('h2');
+        outcomeTitle.textContent = outcome.outcome;
+        outcomeContentInner.appendChild(outcomeTitle);
+        
+        // Add outcome description
+        if (outcome.description) {
+          const outcomeDescription = document.createElement('div');
+          outcomeDescription.className = 'outcome-description';
+          outcomeDescription.textContent = outcome.description;
+          outcomeContentInner.appendChild(outcomeDescription);
+        }
+        
+        // Create dimensions list
+        const dimensionsList = document.createElement('div');
+        dimensionsList.className = 'dimensions-list';
+        
+        outcome.dimensions.forEach(dimension => {
+          const dimensionItem = document.createElement('div');
+          dimensionItem.className = 'dimension-item';
+          
+          const dimensionTitle = document.createElement('h3');
+          dimensionTitle.className = 'dimension-title';
+          dimensionTitle.textContent = dimension.name;
+          dimensionItem.appendChild(dimensionTitle);
+          
+          // Add methods and indicators
+          dimension.methods.forEach(method => {
+            const methodItem = document.createElement('div');
+            methodItem.className = 'method-item';
+            
+            const methodName = document.createElement('p');
+            methodName.className = 'method-name';
+            methodName.textContent = method.name;
+            methodItem.appendChild(methodName);
+            
+            const indicatorsList = document.createElement('ul');
+            indicatorsList.className = 'indicators-list';
+            
+            method.indicators.forEach(indicator => {
+              const indicatorItem = document.createElement('li');
+              indicatorItem.textContent = indicator;
+              indicatorsList.appendChild(indicatorItem);
+            });
+            
+            methodItem.appendChild(indicatorsList);
+            dimensionItem.appendChild(methodItem);
+          });
+          
+          dimensionsList.appendChild(dimensionItem);
+        });
+        
+        outcomeContentInner.appendChild(dimensionsList);
+        outcomeContent.appendChild(outcomeContentInner);
+        document.body.appendChild(outcomeContent);
+        
+        // Show the full-screen content when clicking on an outcome
+        outcomeBlock.addEventListener('click', () => {
+          outcomeContent.classList.add('visible');
+        });
+        
+        outcomesGrid.appendChild(outcomeBlock);
+      });
+
+      resultsEl.appendChild(outcomesGrid);
     }
   </script>
 </body>
